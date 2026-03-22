@@ -19,7 +19,7 @@ import {
 const roles = [
   { value: "retail-customer", label: "Retail Customer", icon: Store },
   { value: "rdc-staff", label: "RDC Staff", icon: Building2 },
-  { value: "head-office", label: "Head Office Manager", icon: UserCog },
+  // { value: "head-office", label: "Head Office Manager", icon: UserCog },
   { value: "admin", label: "Admin", icon: ShieldCheck },
 ];
 
