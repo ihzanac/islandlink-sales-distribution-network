@@ -196,7 +196,9 @@ export default function CategoryPageLayout({
         subTotal,
         paymentMethod,
         status: paymentMethod === "cash" ? "pending_delivery" : "pending_payment",
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        deliveryLat: auth.lat || null,
+        deliveryLng: auth.lng || null
       };
 
       const docRef = await addDoc(collection(db, "orders"), orderData);
@@ -561,7 +563,7 @@ export default function CategoryPageLayout({
                           onChange={() => setPaymentMethod("card")}
                           className="accent-brand"
                         />
-                        <span className="text-sm font-medium">Card Payment</span>
+                        <span className="text-sm font-medium">Card / PayPal</span>
                       </label>
                     </div>
                   </div>
@@ -592,7 +594,7 @@ export default function CategoryPageLayout({
                       }`}
                   >
                     <Send size={15} />
-                    Send Enquiry
+                    {paymentMethod === "card" ? "Proceed to PayPal" : "Send Enquiry"}
                   </button>
                 </form>
               ) : (

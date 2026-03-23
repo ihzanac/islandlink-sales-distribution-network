@@ -7,12 +7,11 @@ import {
   Phone,
   Package,
   Loader2,
-  Mail,
   Receipt,
   Calendar,
-  MapPin,
-  Signal,
   SignalZero,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { useAppSelector } from "../../store/hooks";
 import {
@@ -43,6 +42,7 @@ interface Delivery {
   createdAt: string;
   notes: string;
   paymentMethod: string;
+  products: any[];
 }
 
 // ── Status Config ─────────────────────────────────────────────────────────────
@@ -82,6 +82,8 @@ const DeliveryBoy = () => {
   const auth = useAppSelector((state) => state.auth);
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"assigned" | "available">("assigned");
+  const [availableOrders, setAvailableOrders] = useState<Delivery[]>([]);
   const [locationSharing, setLocationSharing] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const watchIdRef = useRef<number | null>(null);
@@ -119,6 +121,7 @@ const DeliveryBoy = () => {
             createdAt: d.createdAt || new Date().toISOString(),
             notes: d.notes || "",
             paymentMethod: d.paymentMethod || "cash",
+            products: d.items || [],
           };
         });
 
@@ -132,10 +135,62 @@ const DeliveryBoy = () => {
         });
 
         setDeliveries(fetched);
-        setLoading(false);
+        if (activeTab === "assigned") setLoading(false);
       },
       (error) => {
         console.error("Error fetching deliveries:", error);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [auth.uid, activeTab]);
+
+  // Fetch Available orders (unassigned)
+  useEffect(() => {
+    if (!auth.uid) return;
+
+    const ordersRef = collection(db, "orders");
+    const q = query(
+      ordersRef,
+      where("status", "in", ["pending_delivery", "pending_payment", "payment_complete"]),
+      where("assignedTo", "==", null)
+    );
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const fetched: Delivery[] = snapshot.docs.map((docSnap) => {
+          const d = docSnap.data();
+          const totalItems = (d.items || []).reduce(
+            (sum: number, item: any) => sum + (item.qty || 1),
+            0
+          );
+
+          return {
+            id: docSnap.id,
+            customer: d.customerName || "",
+            phone: d.customerPhone || "",
+            email: d.customerEmail || "",
+            business: d.customerBusiness || null,
+            items: totalItems,
+            total: d.subTotal || 0,
+            status: "shipped", // Using shipped as placeholder for UI consistency
+            createdAt: d.createdAt || new Date().toISOString(),
+            notes: d.notes || "",
+            paymentMethod: d.paymentMethod || "cash",
+            products: d.items || [],
+          };
+        });
+
+        fetched.sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+
+        setAvailableOrders(fetched);
+        setLoading(false);
+      },
+      (error) => {
+        console.error("Error fetching available orders:", error);
         setLoading(false);
       }
     );
@@ -184,8 +239,8 @@ const DeliveryBoy = () => {
           error.code === 1
             ? "Location permission denied. Please allow location access."
             : error.code === 2
-            ? "Location unavailable. Please check your GPS."
-            : "Location request timed out."
+              ? "Location unavailable. Please check your GPS."
+              : "Location request timed out."
         );
         setLocationSharing(false);
       },
@@ -223,6 +278,25 @@ const DeliveryBoy = () => {
     };
   }, []);
 
+  // Accept an order
+  async function acceptOrder(id: string) {
+    if (!auth.uid) return;
+    try {
+      await updateDoc(doc(db, "orders", id), {
+        status: "shipped",
+        assignedTo: auth.uid,
+        assignedStaffId: auth.uid,
+      });
+
+      // Auto-start location sharing if not active
+      if (!locationSharing) {
+        startLocationSharing();
+      }
+    } catch (err) {
+      console.error("Failed to accept order:", err);
+    }
+  }
+
   // Mark an order as delivered in Firestore
   async function markDelivered(id: string) {
     try {
@@ -234,160 +308,140 @@ const DeliveryBoy = () => {
     }
   }
 
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  // ── Tabs ──
   const pending = deliveries.filter((d) => d.status === "shipped").length;
   const delivered = deliveries.filter((d) => d.status === "delivered").length;
+  const currentItems = activeTab === "assigned" ? deliveries : availableOrders;
 
   return (
-    <div className="min-h-screen bg-[#08080C] font-sans">
+    <div className="min-h-screen bg-[#08080C] font-sans text-white">
       {/* ── Header ── */}
-      <div className="relative px-5 md:px-12 pt-8 pb-8">
-        {/* Glow blob */}
+      <div className="relative px-5 md:px-12 pt-8">
         <div className="absolute top-0 right-1/3 w-72 h-72 bg-violet-600/8 rounded-full blur-3xl pointer-events-none" />
 
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-white/45 hover:text-white transition-colors text-sm group mb-8"
-        >
-          <ArrowLeft
-            size={14}
-            className="group-hover:-translate-x-1 transition-transform"
-          />
-          Back to Home
-        </Link>
-
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-violet-400 mb-1">
-              Delivery Dashboard
-            </p>
-            <h1 className="text-3xl md:text-4xl font-extrabold text-white">
-              My Deliveries
-            </h1>
-            <p className="text-white/35 text-sm mt-2">
-              Manage your assigned delivery orders.
-            </p>
-          </div>
+        <div className="flex items-center justify-between mb-8">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-white/45 hover:text-white transition-colors text-sm group"
+          >
+            <ArrowLeft
+              size={14}
+              className="group-hover:-translate-x-1 transition-transform"
+            />
+            Back to Home
+          </Link>
 
           {/* Location Sharing Toggle */}
           {auth.uid && (
-            <div className="flex flex-col items-end gap-2">
+            <div className="flex flex-col items-end gap-1">
               <button
                 id="toggle-location-sharing"
                 onClick={() =>
                   locationSharing ? stopLocationSharing() : startLocationSharing()
                 }
-                className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
-                  locationSharing
-                    ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25"
-                    : "bg-white/5 border border-white/10 text-white/50 hover:text-white hover:bg-white/10"
-                }`}
+                className={`flex items-center gap-2.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-300 ${locationSharing
+                  ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25"
+                  : "bg-white/5 border border-white/10 text-white/50 hover:text-white"
+                  }`}
               >
                 {locationSharing ? (
                   <>
-                    <span className="relative flex h-2.5 w-2.5">
+                    <span className="relative flex h-2 w-2">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
                     </span>
-                    <Signal size={14} />
-                    Sharing Location
+                    Live Tracking Active
                   </>
                 ) : (
                   <>
-                    <SignalZero size={14} />
-                    <MapPin size={14} />
-                    Share Location
+                    <SignalZero size={13} />
+                    Go Online (Share Location)
                   </>
                 )}
               </button>
-
               {locationError && (
-                <p className="text-red-400 text-xs max-w-[250px] text-right">
+                <p className="text-red-500 text-[10px] font-medium mt-1 animate-pulse">
                   {locationError}
                 </p>
               )}
             </div>
           )}
         </div>
-      </div>
 
-      {/* ── Stats ── */}
-      <div className="px-5 md:px-12 mb-7">
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            {
-              label: "Total Assigned",
-              value: deliveries.length,
-              color: "text-violet-400",
-              bg: "bg-violet-500/10",
-              border: "border-violet-500/20",
-            },
-            {
-              label: "Pending",
-              value: pending,
-              color: "text-amber-400",
-              bg: "bg-amber-500/10",
-              border: "border-amber-500/20",
-            },
-            {
-              label: "Delivered",
-              value: delivered,
-              color: "text-emerald-400",
-              bg: "bg-emerald-500/10",
-              border: "border-emerald-500/20",
-            },
-          ].map((s) => (
-            <div
-              key={s.label}
-              className={`rounded-2xl border ${s.border} ${s.bg} px-4 py-4 text-center`}
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-8">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-violet-500 mb-2">
+              Staff Portal
+            </p>
+            <h1 className="text-4xl font-extrabold tracking-tight">
+              Delivery <span className="text-violet-500">Center</span>
+            </h1>
+          </div>
+
+          <div className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.08] p-1 rounded-2xl">
+            <button
+              onClick={() => setActiveTab("assigned")}
+              className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === "assigned"
+                ? "bg-violet-600 text-white shadow-lg shadow-violet-600/20"
+                : "text-white/40 hover:text-white/60"
+                }`}
             >
-              <p className={`text-2xl font-extrabold ${s.color}`}>{s.value}</p>
-              <p className="text-white/40 text-xs mt-0.5">{s.label}</p>
-            </div>
-          ))}
+              My Tasks ({deliveries.length})
+            </button>
+            <button
+              id="tab-available"
+              onClick={() => setActiveTab("available")}
+              className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === "available"
+                ? "bg-violet-600 text-white shadow-lg shadow-violet-600/20"
+                : "text-white/40 hover:text-white/60"
+                }`}
+            >
+              Available ({availableOrders.length})
+            </button>
+          </div>
         </div>
       </div>
 
+      {/* ── Stats ── */}
+      {activeTab === "assigned" && (
+        <div className="px-5 md:px-12 mb-8">
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              { label: "Pending", value: pending, color: "text-amber-400", bg: "bg-amber-500/10" },
+              { label: "Delivered", value: delivered, color: "text-emerald-400", bg: "bg-emerald-500/10" },
+            ].map((s) => (
+              <div key={s.label} className={`rounded-3xl border border-white/5 ${s.bg} p-6`}>
+                <p className={`text-3xl font-black ${s.color}`}>{s.value}</p>
+                <p className="text-white/30 text-[10px] uppercase font-bold tracking-widest mt-1">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ── Delivery Cards ── */}
-      <div className="px-5 md:px-12 pb-20 space-y-3">
+      <div className="px-5 md:px-12 pb-20 space-y-4">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-28 text-center">
-            <Loader2
-              size={32}
-              className="text-violet-400 animate-spin mb-4"
-            />
-            <p className="text-white/40 font-medium">
-              Loading your deliveries…
-            </p>
+            <Loader2 size={32} className="text-violet-500 animate-spin mb-4" />
+            <p className="text-white/40 text-sm font-medium tracking-wide uppercase">Processing Feed...</p>
           </div>
         ) : !auth.uid ? (
-          <div className="flex flex-col items-center justify-center py-28 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-4">
-              <Truck size={28} className="text-violet-400/50" />
-            </div>
-            <p className="text-white/40 font-medium">
-              Please log in to view your deliveries
-            </p>
-            <Link
-              to="/login"
-              className="mt-4 px-6 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition-all"
-            >
-              Go to Login
-            </Link>
+          <div className="flex flex-col items-center justify-center py-28 text-center bg-white/[0.02] border border-white/[0.05] rounded-[2rem]">
+            <Truck size={32} className="text-white/10 mb-6" />
+            <p className="text-white/40 font-bold mb-6">Staff Authentication Required</p>
+            <Link to="/login" className="px-8 py-3 rounded-2xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-bold transition-all shadow-xl shadow-violet-600/20">Sign In</Link>
           </div>
-        ) : deliveries.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-28 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-4">
-              <Package size={28} className="text-violet-400/50" />
-            </div>
-            <p className="text-white/40 font-medium">
-              No deliveries assigned yet
-            </p>
-            <p className="text-white/25 text-sm mt-1">
-              Orders will appear here once admin assigns them to you.
-            </p>
+        ) : currentItems.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-32 text-center bg-white/[0.02] border border-white/[0.05] rounded-[2rem]">
+            <Package size={32} className="text-white/10 mb-6" />
+            <p className="text-white/40 font-bold">{activeTab === "assigned" ? "Zero Tasks Assigned" : "No Available Orders"}</p>
+            <p className="text-white/20 text-xs mt-2">{activeTab === "assigned" ? "New tasks will show up in the 'Available' tab." : "Check back later for incoming delivery requests."}</p>
           </div>
         ) : (
-          deliveries.map((d) => {
+          currentItems.map((d) => {
             const cfg = STATUS[d.status];
             const Icon = cfg.icon;
 
@@ -413,7 +467,10 @@ const DeliveryBoy = () => {
                 </div>
 
                 {/* Details */}
-                <div className="flex-1 min-w-0 space-y-1">
+                <div
+                  className="flex-1 min-w-0 space-y-1 cursor-pointer"
+                  onClick={() => setExpandedId(expandedId === d.id ? null : d.id)}
+                >
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-white font-semibold text-sm">
                       {d.customer}
@@ -421,6 +478,7 @@ const DeliveryBoy = () => {
                     <span className="text-white/25 text-xs font-mono">
                       {d.id.slice(0, 10).toUpperCase()}
                     </span>
+                    {expandedId === d.id ? <ChevronUp size={12} className="text-white/20" /> : <ChevronDown size={12} className="text-white/20" />}
                   </div>
 
                   {d.business && (
@@ -435,15 +493,9 @@ const DeliveryBoy = () => {
                       <Phone size={10} />
                       {d.phone}
                     </span>
-                    {d.email && (
-                      <span className="flex items-center gap-1">
-                        <Mail size={10} />
-                        {d.email}
-                      </span>
-                    )}
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1 text-violet-400">
                       <Package size={10} />
-                      {d.items} item{d.items !== 1 ? "s" : ""}
+                      {d.items} Items
                     </span>
                     <span className="flex items-center gap-1">
                       <Calendar size={10} />
@@ -451,10 +503,26 @@ const DeliveryBoy = () => {
                     </span>
                   </div>
 
-                  {d.notes && (
-                    <p className="text-white/30 text-xs italic mt-1">
-                      "{d.notes}"
-                    </p>
+                  {/* Expanded Product List */}
+                  {expandedId === d.id && (
+                    <div className="mt-4 pt-4 border-t border-white/5 space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                      <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mb-2">Order Line Items</p>
+                      {d.products.map((p, idx) => (
+                        <div key={idx} className="flex items-center justify-between text-xs bg-white/[0.02] p-2 rounded-lg border border-white/[0.03]">
+                          <div className="flex items-center gap-3">
+                            <span className="w-5 h-5 rounded flex items-center justify-center bg-violet-500/10 text-violet-400 font-bold text-[10px]">{p.qty || 1}x</span>
+                            <span className="text-white/70">{p.name || "Unknown Product"}</span>
+                          </div>
+                          <span className="text-white/30 text-[10px] font-mono">{p.sku || ""}</span>
+                        </div>
+                      ))}
+                      {d.notes && (
+                        <div className="mt-3 p-2 rounded bg-amber-500/5 border border-amber-500/10">
+                          <p className="text-[9px] text-amber-500/50 font-bold uppercase mb-1">Instruction</p>
+                          <p className="text-amber-500/70 text-[11px] italic">"{d.notes}"</p>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
 
@@ -478,13 +546,22 @@ const DeliveryBoy = () => {
                     {cfg.label}
                   </span>
 
-                  {d.status !== "delivered" && (
+                  {activeTab === "assigned" ? (
+                    d.status !== "delivered" && (
+                      <button
+                        onClick={() => markDelivered(d.id)}
+                        className="px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-lg shadow-emerald-500/10"
+                      >
+                        Complete
+                      </button>
+                    )
+                  ) : (
                     <button
-                      id={`mark-delivered-${d.id}`}
-                      onClick={() => markDelivered(d.id)}
-                      className="px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 shadow-sm shadow-violet-500/30"
+                      id={`accept-order-${d.id}`}
+                      onClick={() => acceptOrder(d.id)}
+                      className="px-5 py-2.5 rounded-2xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold transition-all shadow-lg shadow-violet-500/10"
                     >
-                      Mark Delivered
+                      Accept Task
                     </button>
                   )}
                 </div>

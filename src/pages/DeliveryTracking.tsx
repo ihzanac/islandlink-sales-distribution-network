@@ -445,7 +445,7 @@ function DeliveryBoyCard({
 
 // ── Main Component ───────────────────────────────────────────────────────────
 
-const GOOGLE_MAPS_API_KEY = "AIzaSyCos8yKu0b9-MDAJCgbdwIvINk6QbCcDOQ";
+const GOOGLE_MAPS_API_KEY = "AIzaSyCWbUP2jSGJ4lp-Dlh3IOKZkOgXhmfKXnY";
 
 const DeliveryTracking = () => {
   const authState = useAppSelector((state) => state.auth);

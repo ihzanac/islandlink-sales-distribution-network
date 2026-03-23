@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
-import { CheckCircle2, CreditCard, Layers, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Layers } from "lucide-react";
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 export default function PaymentPage() {
   const [searchParams] = useSearchParams();
@@ -12,32 +13,7 @@ export default function PaymentPage() {
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvv, setCvv] = useState("");
-
-  const handlePayment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!orderId) return;
-
-    setIsProcessing(true);
-    // Simulate payment processing delay
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    try {
-      await updateDoc(doc(db, "orders", orderId), {
-        status: "payment_complete",
-        paymentDate: new Date().toISOString(),
-      });
-      setIsSuccess(true);
-      setTimeout(() => navigate("/dashboard"), 3000);
-    } catch (err) {
-      console.error(err);
-      alert("Payment failed.");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   if (!orderId) {
     return (
@@ -77,77 +53,79 @@ export default function PaymentPage() {
           <span className="text-2xl font-black text-brand">LKR {amount}</span>
         </div>
 
-        <form onSubmit={handlePayment} className="space-y-4">
-          <div>
-            <label className="text-white/40 text-xs mb-1 block uppercase tracking-wider font-semibold">
-              Name on Card
-            </label>
+        <div className="mt-8 relative min-h-[150px]">
+          {isProcessing && (
+            <div className="absolute inset-[-10px] bg-black/60 backdrop-blur-[2px] z-50 flex flex-col items-center justify-center rounded-2xl">
+              <div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin mb-3"></div>
+              <p className="text-white font-bold text-sm">Processing...</p>
+              <p className="text-white/50 text-[10px] mt-1">Please wait</p>
+            </div>
+          )}
+
+          {/* Terms & Conditions Checkbox */}
+          <div className="mb-6 flex items-start gap-3 bg-[#08080C] border border-white/10 p-4 rounded-xl">
             <input
-              required
-              placeholder="JOHN DOE"
-              className="w-full bg-[#08080C] border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-brand transition-colors"
+              type="checkbox"
+              id="terms"
+              checked={termsAccepted}
+              onChange={(e) => setTermsAccepted(e.target.checked)}
+              className="mt-1 flex-shrink-0 w-4 h-4 rounded border-white/20 bg-white/5 accent-brand cursor-pointer"
             />
-          </div>
-
-          <div>
-            <label className="text-white/40 text-xs mb-1 block uppercase tracking-wider font-semibold">
-              Card Number
+            <label htmlFor="terms" className="text-xs text-white/50 cursor-pointer leading-relaxed select-none">
+              I agree to the <span className="text-white hover:text-brand transition-colors underline">Terms & Conditions</span> and <span className="text-white hover:text-brand transition-colors underline">Refund Policy</span>. I understand that my payment will be processed securely via PayPal.
             </label>
-            <div className="relative">
-              <CreditCard size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" />
-              <input
-                required
-                value={cardNumber}
-                onChange={(e) => setCardNumber(e.target.value)}
-                placeholder="0000 0000 0000 0000"
-                className="w-full bg-[#08080C] border border-white/10 rounded-xl pl-11 pr-4 py-3 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-brand transition-colors font-mono"
-              />
-            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-white/40 text-xs mb-1 block uppercase tracking-wider font-semibold">
-                Expiry (MM/YY)
-              </label>
-              <input
-                required
-                value={expiry}
-                onChange={(e) => setExpiry(e.target.value)}
-                placeholder="12/26"
-                className="w-full bg-[#08080C] border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-brand transition-colors font-mono"
-              />
-            </div>
-            <div>
-              <label className="text-white/40 text-xs mb-1 block uppercase tracking-wider font-semibold">
-                CVV
-              </label>
-              <input
-                required
-                type="password"
-                maxLength={4}
-                value={cvv}
-                onChange={(e) => setCvv(e.target.value)}
-                placeholder="123"
-                className="w-full bg-[#08080C] border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-brand transition-colors font-mono"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 text-white/40 text-[11px] justify-center mt-6 mb-6">
-            <ShieldCheck size={14} className="text-green-500" />
-            <span>Payments are secure and encrypted.</span>
-          </div>
-
-          <button
-            type="submit"
-            disabled={isProcessing}
-            className={`w-full py-4 rounded-xl text-white font-bold text-sm transition-all shadow-lg ${isProcessing ? "opacity-50 bg-white/10 cursor-not-allowed" : "bg-brand hover:bg-brand-dark shadow-brand-glow hover:-translate-y-0.5"
-              }`}
-          >
-            {isProcessing ? "Processing..." : `Pay LKR ${amount}`}
-          </button>
-        </form>
+          <PayPalScriptProvider options={{ clientId: "test", currency: "USD" }}>
+            <PayPalButtons
+              disabled={!termsAccepted}
+              createOrder={(_data: any, actions: any) => {
+                const safeAmount = amount || "0";
+                const usdAmount = (parseFloat(safeAmount) / 300).toFixed(2);
+                return actions.order.create({
+                  intent: "CAPTURE",
+                  purchase_units: [
+                    {
+                      amount: {
+                        currency_code: "USD",
+                        value: usdAmount,
+                      },
+                      description: `iIslandLink Order ${orderId.slice(0, 8).toUpperCase()}`,
+                    },
+                  ],
+                });
+              }}
+              onApprove={async (_data: any, actions: any) => {
+                if (!actions.order) return;
+                setIsProcessing(true);
+                try {
+                  const details = await actions.order.capture();
+                  await updateDoc(doc(db, "orders", orderId), {
+                    status: "payment_complete",
+                    paymentDate: new Date().toISOString(),
+                    paypalOrderId: details.id,
+                    paypalPayerId: details.payer?.payer_id || "unknown",
+                  });
+                  setIsSuccess(true);
+                  setTimeout(() => navigate("/customer-history"), 3000);
+                } catch (err) {
+                  console.error(err);
+                  alert("Payment capture failed. Please try again.");
+                } finally {
+                  setIsProcessing(false);
+                }
+              }}
+              onError={(err) => {
+                console.error("PayPal Error:", err);
+                alert("An error occurred with PayPal. Please try again.");
+              }}
+              onCancel={() => {
+                alert("Payment was cancelled.");
+              }}
+              style={{ layout: "vertical", shape: "rect", color: "gold" }}
+            />
+          </PayPalScriptProvider>
+        </div>
       </div>
     </div>
   );

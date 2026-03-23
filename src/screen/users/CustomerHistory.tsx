@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -27,6 +27,10 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import { db } from "../../firebase/config";
+import { Wrapper, Status } from "@googlemaps/react-wrapper";
+import { doc as fsDoc } from "firebase/firestore";
+
+const GOOGLE_MAPS_API_KEY = "AIzaSyCWbUP2jSGJ4lp-Dlh3IOKZkOgXhmfKXnY";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -63,6 +67,9 @@ interface Order {
   notes?: string;
   total: number;
   paymentMethod: string;
+  assignedStaffId?: string | null;
+  deliveryLat?: number | null;
+  deliveryLng?: number | null;
 }
 
 // ── Status Helpers ─────────────────────────────────────────────────────────────
@@ -149,6 +156,146 @@ function parsePrice(priceStr: string): number {
   const val = parseFloat(numericStr);
   return isNaN(val) ? 0 : val;
 }
+
+// ── Live Tracking Map ────────────────────────────────────────────────────────
+
+const LiveTrackingMap: React.FC<{
+  staffId: string;
+  deliveryLat?: number | null;
+  deliveryLng?: number | null;
+}> = ({ staffId, deliveryLat, deliveryLng }) => {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [courierLoc, setCourierLoc] = useState<{ lat: number; lng: number } | null>(null);
+
+  useEffect(() => {
+    if (!staffId) return;
+    const locRef = fsDoc(db, "delivery_locations", staffId);
+    const unsubscribe = onSnapshot(locRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.lat && data.lng) {
+          setCourierLoc({ lat: data.lat, lng: data.lng });
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, [staffId]);
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+    if (!courierLoc && (!deliveryLat || !deliveryLng)) return;
+
+    const map = new google.maps.Map(mapRef.current, {
+      center: courierLoc || { lat: deliveryLat || 0, lng: deliveryLng || 0 },
+      zoom: 14,
+      styles: [
+        { elementType: "geometry", stylers: [{ color: "#1a1a2e" }] },
+        { elementType: "labels.text.stroke", stylers: [{ color: "#1a1a2e" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#8a8a9a" }] },
+        { featureType: "road", elementType: "geometry", stylers: [{ color: "#2a2a3e" }] },
+        { featureType: "water", elementType: "geometry", stylers: [{ color: "#0e0e1a" }] },
+      ],
+      disableDefaultUI: true,
+      zoomControl: true,
+    });
+
+    const bounds = new google.maps.LatLngBounds();
+
+    // Courier Marker
+    if (courierLoc) {
+      const courierMarker = new google.maps.Marker({
+        position: courierLoc,
+        map,
+        icon: {
+          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+          scale: 7,
+          fillColor: "#8b5cf6",
+          fillOpacity: 1,
+          strokeWeight: 2,
+          strokeColor: "#ffffff",
+          rotation: 0,
+        },
+        title: "Courier",
+      });
+
+      const courierInfo = new google.maps.InfoWindow({
+        content: `<div style="color: #000; padding: 5px;"><strong>Courier</strong><br/>Out for delivery</div>`,
+      });
+
+      courierMarker.addListener("click", () => courierInfo.open(map, courierMarker));
+      bounds.extend(courierLoc);
+    }
+
+    // Destination Marker
+    if (deliveryLat && deliveryLng) {
+      const destPos = { lat: deliveryLat, lng: deliveryLng };
+      const destMarker = new google.maps.Marker({
+        position: destPos,
+        map,
+        icon: {
+          url: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
+          scaledSize: new google.maps.Size(32, 32),
+        },
+        title: "Your Delivery Point",
+      });
+
+      const destInfo = new google.maps.InfoWindow({
+        content: `<div style="color: #000; padding: 5px;"><strong>Destination</strong><br/>Your delivery address</div>`,
+      });
+
+      destMarker.addListener("click", () => destInfo.open(map, destMarker));
+      bounds.extend(destPos);
+
+      // Polyline (Route)
+      if (courierLoc) {
+        new google.maps.Polyline({
+          path: [courierLoc, destPos],
+          geodesic: true,
+          strokeColor: "#8b5cf6",
+          strokeOpacity: 0.6,
+          strokeWeight: 4,
+          map,
+        });
+      }
+    }
+
+    if (!bounds.isEmpty()) {
+      map.fitBounds(bounds, { top: 40, bottom: 40, left: 40, right: 40 });
+    }
+  }, [courierLoc, deliveryLat, deliveryLng]);
+
+  if (!courierLoc && (!deliveryLat || !deliveryLng)) {
+    return (
+      <div className="h-48 w-full bg-white/5 animate-pulse rounded-xl flex items-center justify-center text-white/20 text-xs">
+        Preparing live tracking...
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative group">
+      <div ref={mapRef} className="h-64 w-full rounded-2xl border border-white/10 overflow-hidden shadow-2xl transition-all duration-500 group-hover:border-violet-500/30" />
+      <button
+        type="button"
+        onClick={() => {
+          if (mapRef.current && courierLoc) {
+            // Recenter logically would happen via fitBounds in useEffect
+          }
+        }}
+        className="absolute bottom-4 right-4 bg-violet-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2"
+      >
+        <MapPin size={10} />
+        Auto-fit View
+      </button>
+    </div>
+  );
+};
+
+const renderMapStatus = (status: Status) => {
+  if (status === Status.LOADING) return <div className="h-48 w-full bg-white/5 animate-pulse rounded-xl flex items-center justify-center text-white/20 text-xs text-center">Loading live tracking map...</div>;
+  if (status === Status.FAILURE) return <div className="h-48 w-full bg-red-500/5 rounded-xl flex items-center justify-center text-red-500/40 text-xs">Failed to load map</div>;
+  return <></>;
+};
 
 function OrderCard({ order }: { order: Order }) {
   const [expanded, setExpanded] = useState(false);
@@ -308,6 +455,34 @@ function OrderCard({ order }: { order: Order }) {
             </div>
           </div>
 
+          {/* Live Tracking Map Section (Visible for all active orders) */}
+          {["pending_delivery", "payment_complete", "shipped"].includes(order.status) && (
+            <div className="space-y-3 pb-2">
+              <div className="flex items-center justify-between">
+                <p className="text-white/45 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping" />
+                  Order Tracking
+                </p>
+                <span className="text-[10px] text-blue-400 font-medium">
+                  {order.status === "shipped" ? "Out for delivery" : "Processing your order"}
+                </span>
+              </div>
+              <div className="relative group">
+                <Wrapper apiKey={GOOGLE_MAPS_API_KEY} render={(status) => renderMapStatus(status) as any}>
+                  <LiveTrackingMap 
+                    staffId={order.assignedStaffId || ""} 
+                    deliveryLat={order.deliveryLat} 
+                    deliveryLng={order.deliveryLng} 
+                  />
+                </Wrapper>
+                <div className="absolute top-3 left-3 px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">Live View</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Customer info + Notes row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Customer Details */}
@@ -440,6 +615,9 @@ const CustomerHistory = () => {
             notes: d.notes || "",
             total: d.subTotal || 0,
             paymentMethod: d.paymentMethod || "cash",
+            assignedStaffId: d.assignedStaffId || null,
+            deliveryLat: d.deliveryLat || d.lat || null,
+            deliveryLng: d.deliveryLng || d.lng || null,
           };
         });
         // Sort client-side by createdAt descending (newest first)

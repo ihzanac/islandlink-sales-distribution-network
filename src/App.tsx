@@ -60,7 +60,9 @@ function App() {
               businessName: userData.businessName || null,
               district: userData.district || null,
               phone: userData.phone || null,
-              province: userData.province || null
+              province: userData.province || null,
+              lat: userData.lat || null,
+              lng: userData.lng || null
             }));
           } else {
             dispatch(setUser({
