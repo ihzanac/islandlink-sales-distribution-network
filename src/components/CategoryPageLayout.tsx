@@ -7,15 +7,17 @@ import {
   Send,
   ChevronRight,
   Search,
+  Loader2,
+  Package,
 } from "lucide-react";
 import { useAppSelector } from "../store/hooks";
 import { toast } from "react-toastify";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useNavigate } from "react-router-dom";
 
 export interface Product {
-  id: number;
+  id: string | number;
   name: string;
   sku: string;
   category: string;
@@ -112,7 +114,35 @@ export default function CategoryPageLayout({
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("cash");
   const [sent, setSent] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [localProducts, setLocalProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch dynamic products from Firestore
+  useEffect(() => {
+    const productsRef = collection(db, "products");
+    const q = query(productsRef, where("category", "==", title));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetched: Product[] = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Product[];
+      
+      // If we have dynamic products, use them, otherwise fallback to static prop
+      if (fetched.length > 0) {
+        setLocalProducts(fetched);
+      } else {
+        setLocalProducts(products);
+      }
+      setLoading(false);
+    }, (error) => {
+      console.error("Error fetching products:", error);
+      setLocalProducts(products); // fallback
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [title, products]);
 
   useEffect(() => {
     if (auth.name || auth.phone || auth.email || auth.businessName) {
@@ -127,10 +157,10 @@ export default function CategoryPageLayout({
 
   const categories = [
     "All",
-    ...Array.from(new Set(products.map((p) => p.category))),
+    ...Array.from(new Set(localProducts.map((p) => p.category))),
   ];
 
-  const filtered = products.filter((p) => {
+  const filtered = localProducts.filter((p) => {
     const matchSearch =
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.sku.toLowerCase().includes(search.toLowerCase());
@@ -158,11 +188,11 @@ export default function CategoryPageLayout({
     });
   }
 
-  function removeFromCart(id: number) {
+  function removeFromCart(id: string | number) {
     setCart((prev) => prev.filter((i) => i.id !== id));
   }
 
-  function updateQty(id: number, qty: number) {
+  function updateQty(id: string | number, qty: number) {
     if (qty < 1) return removeFromCart(id);
     setCart((prev) =>
       prev.map((i) => {
@@ -182,8 +212,6 @@ export default function CategoryPageLayout({
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
     if (!auth.uid) return;
-
-    setIsSubmitting(true);
     try {
       const orderData = {
         customerId: auth.uid,
@@ -218,8 +246,6 @@ export default function CategoryPageLayout({
       }
     } catch (err) {
       toast.error("Failed to place order. Try again.");
-    } finally {
-      setIsSubmitting(false);
     }
   }
 
@@ -232,10 +258,6 @@ export default function CategoryPageLayout({
   const totalItems = cart.reduce((s, i) => s + i.qty, 0);
   const totalPrice = cart.reduce((s, i) => s + parsePrice(i.price) * i.qty, 0);
   const subTotal = totalPrice;
-  const formattedSubTotal = `LKR ${totalPrice.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
 
   return (
     <div className="min-h-screen bg-[#08080C] font-sans">
@@ -343,9 +365,15 @@ export default function CategoryPageLayout({
 
       {/* ── PRODUCT GRID ────────────────────────────────────────── */}
       <div className="px-6 md:px-14 pb-24">
-        {filtered.length === 0 ? (
-          <div className="text-center py-24 text-white/30 text-sm">
-            No products match your search.
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-32 space-y-4">
+            <Loader2 className={`w-12 h-12 ${ac.text} animate-spin`} />
+            <p className="text-white/40 font-medium animate-pulse">Loading catalogue...</p>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-24 text-white/30 text-sm italic bg-white/2 rounded-3xl border border-dashed border-white/10">
+            <Package size={32} className="mx-auto mb-4 opacity-20" />
+            No products match your selection.
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">

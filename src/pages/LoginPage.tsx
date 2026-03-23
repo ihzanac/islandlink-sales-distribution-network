@@ -5,7 +5,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/config";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { setUser } from "../store/slices/authSlice";
-import { Layers, Mail, Lock, ArrowRight, Store, Building2, UserCog, ShieldCheck } from "lucide-react";
+import { Layers, Mail, Lock, ArrowRight, Store, Building2, ShieldCheck, Truck } from "lucide-react";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import {
@@ -19,6 +19,7 @@ import {
 const roles = [
   { value: "retail-customer", label: "Retail Customer", icon: Store },
   { value: "rdc-staff", label: "RDC Staff", icon: Building2 },
+  { value: "logistics", label: "Logistics Team", icon: Truck },
   // { value: "head-office", label: "Head Office Manager", icon: UserCog },
   { value: "admin", label: "Admin", icon: ShieldCheck },
 ];
@@ -54,12 +55,37 @@ const LoginPage = () => {
     const password = formData.get("password") as string;
 
     try {
+      // ── Static Admin Bypass ─────────────────────────────────────────────
+      // This allows quick access for development/testing
+      if (email === "admin@islandlink.com" && password === "admin123" && role === "admin") {
+        dispatch(setUser({
+          uid: "static-admin-id",
+          email: "admin@islandlink.com",
+          role: "admin",
+          name: "System Administrator",
+          isActive: true,
+          status: "active"
+        }));
+        navigate("/dashboard");
+        return;
+      }
+
       const userCred = await signInWithEmailAndPassword(auth, email, password);
+      // Fetch user role from Firestore
       const docRef = doc(db, "users", userCred.user.uid);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
         const userData = docSnap.data();
+
+        // ── Account Status Check ─────────────────────────────────────────────
+        if (userData.isActive === false) {
+          await auth.signOut(); // Force sign out from Firebase
+          setErrorString("Your account is pending review or has been deactivated. Please contact support.");
+          setLoading(false);
+          return;
+        }
+
         if (userData.role !== role && role !== "admin") {
           setErrorString("Role mismatch. You are registered as " + userData.role);
           setLoading(false);
@@ -74,13 +100,17 @@ const LoginPage = () => {
           businessName: userData.businessName || null,
           district: userData.district || null,
           phone: userData.phone || null,
-          province: userData.province || null
+          province: userData.province || null,
+          isActive: userData.isActive,
+          status: userData.status
         }));
 
         if (userData.role === 'retail-customer') {
           navigate('/customer-history');
         } else if (userData.role === 'rdc-staff') {
           navigate('/delivery-boy');
+        } else if (userData.role === 'logistics') {
+          navigate('/logistics-dashboard');
         } else {
           navigate('/dashboard');
         }
@@ -96,7 +126,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-site-bg text-white flex flex-col">
+    <div className="min-h-screen bg-site-bg text-site-text flex flex-col transition-colors duration-300">
       {/* Background glows */}
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full bg-brand-subtle blur-3xl" />
@@ -111,13 +141,15 @@ const LoginPage = () => {
           </div>
           <div className="flex flex-col leading-none">
             <span className="text-white font-bold text-[14px]">ISDN</span>
-            <span className="text-[9px] text-white/35 uppercase tracking-wider">IslandLink Network</span>
+            <span className="text-[9px] text-site-text-subtle uppercase tracking-wider">IslandLink Network</span>
           </div>
         </Link>
-        <p className="text-xs text-white/40">
-          No account?{" "}
-          <Link to="/register" className="text-brand hover:underline font-medium">Register here</Link>
-        </p>
+        <div className="flex items-center gap-6">
+          <p className="text-xs text-site-text-subtle">
+            No account?{" "}
+            <Link to="/register" className="text-brand hover:underline font-medium">Register here</Link>
+          </p>
+        </div>
       </nav>
 
       {/* Form */}
@@ -129,12 +161,12 @@ const LoginPage = () => {
               <span className="text-[11px] font-medium text-white/70 uppercase tracking-wider">ISDN Portal Login</span>
             </div>
             <h1 className="text-3xl font-extrabold mb-2">Welcome back</h1>
-            <p className="text-white/45 text-sm leading-relaxed">
+            <p className="text-site-text-subtle text-sm leading-relaxed">
               Sign in to access your role-based ISDN dashboard.
             </p>
           </div>
 
-          <div className="bg-dark-card border border-dark-border rounded-3xl p-8 shadow-2xl shadow-black/30">
+          <div className="bg-site-card border border-site-border rounded-3xl p-8 shadow-2xl shadow-black/30">
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               {/* Email */}
               <div className="flex flex-col gap-2">
@@ -163,7 +195,7 @@ const LoginPage = () => {
                     type="password"
                     required
                     placeholder="••••••••"
-                    className="bg-site-bg border-white/8 text-white placeholder:text-white/20 h-11 pl-9 focus-visible:border-brand focus-visible:ring-brand/20"
+                    className="bg-site-surface border-site-border text-site-text placeholder:text-site-text-subtle/40 h-11 pl-9 focus-visible:border-brand focus-visible:ring-brand/20"
                   />
                 </div>
               </div>
@@ -172,10 +204,10 @@ const LoginPage = () => {
               <div className="flex flex-col gap-2">
                 <Label className="text-white/75 text-xs font-semibold uppercase tracking-wider">Login As</Label>
                 <Select value={role} onValueChange={(val) => setRole(val ?? "")}>
-                  <SelectTrigger className="w-full h-11 bg-site-bg border-white/8 text-white data-placeholder:text-white/30">
+                  <SelectTrigger className="w-full h-11 bg-site-surface border-site-border text-site-text data-placeholder:text-site-text-subtle/40">
                     <SelectValue placeholder="Select your role" />
                   </SelectTrigger>
-                  <SelectContent className="bg-dark-card border-dark-border text-white z-200">
+                  <SelectContent className="bg-site-card border-site-border text-site-text z-200">
                     {roles.map((r) => (
                       <SelectItem key={r.value} value={r.value}>
                         <span className="flex items-center gap-2">

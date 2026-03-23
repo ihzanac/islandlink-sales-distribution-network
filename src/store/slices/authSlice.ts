@@ -12,7 +12,10 @@ export interface UserState {
   province?: string | null;
   lat?: number | null;
   lng?: number | null;
+  isActive?: boolean | null;
+  status?: string | null;
 }
+
 
 const initialState: UserState = {
   uid: null,
@@ -25,7 +28,10 @@ const initialState: UserState = {
   province: null,
   lat: null,
   lng: null,
+  isActive: null,
+  status: null,
 };
+
 
 const authSlice = createSlice({
   name: 'auth',
@@ -42,7 +48,10 @@ const authSlice = createSlice({
       state.province = action.payload.province || null;
       state.lat = action.payload.lat || null;
       state.lng = action.payload.lng || null;
+      state.isActive = action.payload.isActive ?? null;
+      state.status = action.payload.status || null;
     },
+
     clearUser(state) {
       state.uid = null;
       state.email = null;
@@ -54,7 +63,10 @@ const authSlice = createSlice({
       state.province = null;
       state.lat = null;
       state.lng = null;
+      state.isActive = null;
+      state.status = null;
     },
+
   },
 });
 

@@ -24,7 +24,8 @@ import {
   setDoc,
   deleteDoc,
 } from "firebase/firestore";
-import { db } from "../../firebase/config";
+import { db, GOOGLE_MAPS_API_KEY } from "../../firebase/config";
+import { Wrapper, Status } from "@googlemaps/react-wrapper";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -43,6 +44,8 @@ interface Delivery {
   notes: string;
   paymentMethod: string;
   products: any[];
+  deliveryLat?: number | null;
+  deliveryLng?: number | null;
 }
 
 // ── Status Config ─────────────────────────────────────────────────────────────
@@ -74,6 +77,98 @@ const STATUS: Record<
     border: "border-emerald-500/25",
     dot: "bg-emerald-400",
   },
+};
+
+// ── Live Delivery Map ────────────────────────────────────────────────────────
+
+const DeliveryMap: React.FC<{
+  deliveryLat: number;
+  deliveryLng: number;
+  courierId: string;
+}> = ({ deliveryLat, deliveryLng, courierId }) => {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [courierLoc, setCourierLoc] = useState<{ lat: number; lng: number } | null>(null);
+
+  useEffect(() => {
+    if (!courierId) return;
+    const locRef = doc(db, "delivery_locations", courierId);
+    const unsubscribe = onSnapshot(locRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.lat && data.lng) {
+          setCourierLoc({ lat: data.lat, lng: data.lng });
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, [courierId]);
+
+  useEffect(() => {
+    if (!mapRef.current || !courierLoc || !deliveryLat || !deliveryLng) return;
+
+    const map = new google.maps.Map(mapRef.current, {
+      center: courierLoc,
+      zoom: 14,
+      styles: [
+        { elementType: "geometry", stylers: [{ color: "#1a1a2e" }] },
+        { elementType: "labels.text.stroke", stylers: [{ color: "#1a1a2e" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#8a8a9a" }] },
+        { featureType: "road", elementType: "geometry", stylers: [{ color: "#2a2a3e" }] },
+        { featureType: "water", elementType: "geometry", stylers: [{ color: "#0e0e1a" }] },
+      ],
+      disableDefaultUI: true,
+      zoomControl: true,
+    });
+
+    const bounds = new google.maps.LatLngBounds();
+
+    // courier marker
+    new google.maps.Marker({
+      position: courierLoc,
+      map,
+      icon: {
+        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+        scale: 7,
+        fillColor: "#8b5cf6",
+        fillOpacity: 1,
+        strokeWeight: 2,
+        strokeColor: "#ffffff",
+        rotation: 0,
+      },
+    });
+
+    // Destination
+    const destPos = { lat: deliveryLat, lng: deliveryLng };
+    new google.maps.Marker({
+      position: destPos,
+      map,
+      icon: {
+        url: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
+        scaledSize: new google.maps.Size(32, 32),
+      },
+    });
+
+    new google.maps.Polyline({
+      path: [courierLoc, destPos],
+      geodesic: true,
+      strokeColor: "#8b5cf6",
+      strokeOpacity: 0.8,
+      strokeWeight: 4,
+      map,
+    });
+
+    bounds.extend(courierLoc);
+    bounds.extend(destPos);
+    map.fitBounds(bounds, { top: 50, bottom: 50, left: 50, right: 50 });
+  }, [courierLoc, deliveryLat, deliveryLng]);
+
+  return <div ref={mapRef} className="h-64 w-full rounded-2xl border border-white/10 overflow-hidden" />;
+};
+
+const renderMapStatus = (status: Status) => {
+  if (status === Status.LOADING) return <div className="h-48 w-full bg-white/5 animate-pulse rounded-xl flex items-center justify-center text-white/20 text-xs text-center">Loading live tracking map...</div>;
+  if (status === Status.FAILURE) return <div className="h-48 w-full bg-red-500/5 rounded-xl flex items-center justify-center text-red-500/40 text-xs">Failed to load map</div>;
+  return <></>;
 };
 
 // ── Main Component ─────────────────────────────────────────────────────────────
@@ -122,6 +217,8 @@ const DeliveryBoy = () => {
             notes: d.notes || "",
             paymentMethod: d.paymentMethod || "cash",
             products: d.items || [],
+            deliveryLat: d.deliveryLat || null,
+            deliveryLng: d.deliveryLng || null,
           };
         });
 
@@ -179,6 +276,8 @@ const DeliveryBoy = () => {
             notes: d.notes || "",
             paymentMethod: d.paymentMethod || "cash",
             products: d.items || [],
+            deliveryLat: d.deliveryLat || null,
+            deliveryLng: d.deliveryLng || null,
           };
         });
 
@@ -520,6 +619,20 @@ const DeliveryBoy = () => {
                         <div className="mt-3 p-2 rounded bg-amber-500/5 border border-amber-500/10">
                           <p className="text-[9px] text-amber-500/50 font-bold uppercase mb-1">Instruction</p>
                           <p className="text-amber-500/70 text-[11px] italic">"{d.notes}"</p>
+                        </div>
+                      )}
+
+                      {/* Map View */}
+                      {d.status === "shipped" && d.deliveryLat && d.deliveryLng && (
+                        <div className="mt-4 space-y-2">
+                           <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mb-2">Customer Location</p>
+                           <Wrapper apiKey={GOOGLE_MAPS_API_KEY} render={renderMapStatus}>
+                              <DeliveryMap 
+                                deliveryLat={d.deliveryLat} 
+                                deliveryLng={d.deliveryLng} 
+                                courierId={auth.uid!} 
+                              />
+                           </Wrapper>
                         </div>
                       )}
                     </div>

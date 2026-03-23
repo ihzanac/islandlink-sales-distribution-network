@@ -7,9 +7,6 @@ import {
   Warehouse,
   Truck,
   Package,
-  Building2,
-  ShieldCheck,
-  UserCog,
 } from "lucide-react";
 import { useAppSelector } from "../store/hooks";
 
@@ -91,15 +88,6 @@ const Hero = () => {
             </Link>
           ) : (
             <>
-              <Link
-                to="/login"
-                id="hero-login-btn"
-                className="group flex items-center gap-2 bg-brand text-brand-on px-7 py-3.5 rounded-xl text-sm font-bold shadow-lg shadow-brand-glow hover:shadow-brand hover:bg-brand-dark hover:-translate-y-0.5 transition-all duration-300"
-              >
-                Login to Portal
-                <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
-              </Link>
-
               <Link
                 to="/register"
                 id="hero-register-btn"

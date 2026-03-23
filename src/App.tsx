@@ -7,6 +7,7 @@ import { useAppDispatch } from "./store/hooks";
 import { setUser, clearUser } from "./store/slices/authSlice";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useTheme } from "./context/ThemeContext";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import Categories from "./components/Categories";
@@ -25,6 +26,8 @@ import DeliveryBoy from "./screen/users/DeliveryBoy";
 import PaymentPage from "./pages/PaymentPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import DeliveryTracking from "./pages/DeliveryTracking";
+import ProtectedRoute from "./components/ProtectedRoute";
+import LogisticsDashboard from "./pages/LogisticsDashboard";
 
 function LandingLayout() {
   return (
@@ -40,6 +43,7 @@ function LandingLayout() {
 }
 
 function App() {
+  const { theme } = useTheme();
   const dispatch = useAppDispatch();
   const [authReady, setAuthReady] = useState(false);
 
@@ -52,6 +56,14 @@ function App() {
 
           if (docSnap.exists()) {
             const userData = docSnap.data();
+            
+            // ── Account Status Check ─────────────────────────────────────────────
+            if (userData.isActive === false) {
+              await auth.signOut();
+              dispatch(clearUser());
+              return;
+            }
+
             dispatch(setUser({
               uid: user.uid,
               email: user.email,
@@ -62,14 +74,17 @@ function App() {
               phone: userData.phone || null,
               province: userData.province || null,
               lat: userData.lat || null,
-              lng: userData.lng || null
+              lng: userData.lng || null,
+              isActive: userData.isActive,
+              status: userData.status
             }));
           } else {
             dispatch(setUser({
               uid: user.uid,
               email: user.email,
               role: null,
-              name: null
+              name: null,
+              isActive: true // Not found in users might be a new login?
             }));
           }
         } catch (error) {
@@ -94,20 +109,67 @@ function App() {
 
   return (
     <BrowserRouter>
-      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
+      <ToastContainer position="top-right" autoClose={3000} theme={theme} />
       <Routes>
         <Route path="/" element={<LandingLayout />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/dashboard" element={<AdminDashboard />} />
-        <Route path="/delivery-tracking" element={<DeliveryTracking />} />
+        
+        {/* Protected Routes */}
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute allowedRoles={["admin", "head-office"]}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/delivery-tracking" 
+          element={
+            <ProtectedRoute allowedRoles={["admin", "head-office", "logistics", "rdc-staff"]}>
+              <DeliveryTracking />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/customer-history" 
+          element={
+            <ProtectedRoute allowedRoles={["retail-customer"]}>
+              <CustomerHistory />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/delivery-boy" 
+          element={
+            <ProtectedRoute allowedRoles={["rdc-staff"]}>
+              <DeliveryBoy />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/payment" 
+          element={
+            <ProtectedRoute allowedRoles={["retail-customer"]}>
+              <PaymentPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/logistics-dashboard" 
+          element={
+            <ProtectedRoute allowedRoles={["logistics"]}>
+              <LogisticsDashboard />
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Public Screens */}
         <Route path="/personal-care" element={<PersonalCare />} />
         <Route path="/cleaning" element={<Cleaning />} />
         <Route path="/packaged-food" element={<PackagedFoods />} />
         <Route path="/beverages" element={<Beverages />} />
-        <Route path="/customer-history" element={<CustomerHistory />} />
-        <Route path="/delivery-boy" element={<DeliveryBoy />} />
-        <Route path="/payment" element={<PaymentPage />} />
       </Routes>
     </BrowserRouter>
   );

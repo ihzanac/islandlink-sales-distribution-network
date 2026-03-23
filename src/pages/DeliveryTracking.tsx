@@ -7,7 +7,7 @@ import {
   where,
   onSnapshot,
 } from "firebase/firestore";
-import { db } from "../firebase/config";
+import { db, GOOGLE_MAPS_API_KEY } from "../firebase/config";
 import { useAppSelector } from "../store/hooks";
 import {
   ArrowLeft,
@@ -445,7 +445,6 @@ function DeliveryBoyCard({
 
 // ── Main Component ───────────────────────────────────────────────────────────
 
-const GOOGLE_MAPS_API_KEY = "AIzaSyCWbUP2jSGJ4lp-Dlh3IOKZkOgXhmfKXnY";
 
 const DeliveryTracking = () => {
   const authState = useAppSelector((state) => state.auth);

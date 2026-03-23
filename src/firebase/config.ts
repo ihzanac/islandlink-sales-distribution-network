@@ -2,15 +2,16 @@ import { initializeApp } from "firebase/app";
 // import { getAnalytics } from "firebase/analytics";
 import { getAuth, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAMqJGGi9y9g6p5jVyNBUZ-kvk4ywMrZ-k",
-  authDomain: "iislandlink.firebaseapp.com",
-  projectId: "iislandlink",
-  storageBucket: "iislandlink.firebasestorage.app",
-  messagingSenderId: "947639529351",
-  appId: "1:947639529351:web:c9069fe28dbc21d687ed22",
-  measurementId: "G-0TG7E39GJ3"
+  apiKey: "AIzaSyBEOGj5j6FAQumk_A6AF_IceOsOVv6nx4c",
+  authDomain: "islandlink-1f345.firebaseapp.com",
+  projectId: "islandlink-1f345",
+  storageBucket: "islandlink-1f345.firebasestorage.app",
+  messagingSenderId: "107273179025",
+  appId: "1:107273179025:web:34bf3aa5ad49b9a51ad430",
+  measurementId: "G-5LJ17RPFSG"
 };
 
 // Initialize Firebase
@@ -18,6 +19,9 @@ const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage(app);
+
+export const GOOGLE_MAPS_API_KEY = firebaseConfig.apiKey;
 
 // keep user logged in even after browser restart
 setPersistence(auth, browserLocalPersistence)
