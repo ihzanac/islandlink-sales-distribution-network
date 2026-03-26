@@ -11,11 +11,11 @@ import {
   where,
   serverTimestamp,
 } from "firebase/firestore";
-import { 
-  ref, 
-  uploadBytes, 
+import {
+  ref,
+  uploadBytes,
   getDownloadURL,
-  deleteObject 
+  deleteObject
 } from "firebase/storage";
 import { storage } from "../firebase/config";
 
@@ -240,7 +240,8 @@ function StatusBadge({ status }: { status: OrderStatus }) {
   const Icon = cfg.icon;
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${cfg.color} ${cfg.bg} ${cfg.border}`}
+      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border 
+        ${cfg.color} ${cfg.bg} ${cfg.border}`}
     >
       <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot} animate-pulse`} />
       <Icon size={11} />
@@ -545,8 +546,8 @@ function AdminOrderCard({
                         }}
                         disabled={!selectedStaff}
                         className={`w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 ${selectedStaff
-                            ? "bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-500/20 hover:-translate-y-0.5"
-                            : "bg-white/5 text-white/25 cursor-not-allowed"
+                          ? "bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-500/20 hover:-translate-y-0.5"
+                          : "bg-white/5 text-white/25 cursor-not-allowed"
                           }`}
                       >
                         <Truck size={14} />
@@ -772,7 +773,7 @@ const AdminDashboard = () => {
   const handleReturnAction = async (requestId: string, orderId: string, status: "approved" | "rejected") => {
     try {
       await updateDoc(doc(db, "returns", requestId), { status });
-      await updateDoc(doc(db, "orders", orderId), { status: status === "approved" ? "returned" : "delivered" }); 
+      await updateDoc(doc(db, "orders", orderId), { status: status === "approved" ? "returned" : "delivered" });
       toast.success(`Return request ${status} successfully`);
     } catch (err) {
       console.error("Failed to update return request:", err);
@@ -827,7 +828,7 @@ const AdminDashboard = () => {
           });
         }
       }
-      
+
       toast.success("Initial inventory seeded!");
     } catch (err) {
       console.error("Seeding failed:", err);
@@ -927,7 +928,7 @@ const AdminDashboard = () => {
   }, [products]);
 
   // ── Chart Data Preparation ─────────────────────────────────────────────────
-  
+
   // 1. Revenue Over Time (Last 7 Days)
   const last7Days = [...Array(7)].map((_, i) => {
     const d = new Date();
@@ -1002,8 +1003,8 @@ const AdminDashboard = () => {
                   key={item.id}
                   onClick={() => setActiveTab(item.id as AdminTab)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive
-                      ? "bg-violet-600/10 text-violet-500 border border-violet-500/20"
-                      : "text-site-text-subtle hover:text-site-text hover:bg-site-surface border border-transparent"
+                    ? "bg-violet-600/10 text-violet-500 border border-violet-500/20"
+                    : "text-site-text-subtle hover:text-site-text hover:bg-site-surface border border-transparent"
                     }`}
                 >
                   <Icon size={16} />
@@ -1106,26 +1107,26 @@ const AdminDashboard = () => {
                       <AreaChart data={revenueData}>
                         <defs>
                           <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                            <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-                        <XAxis 
-                          dataKey="date" 
-                          stroke="#ffffff30" 
-                          fontSize={10} 
-                          tickLine={false} 
-                          axisLine={false} 
+                        <XAxis
+                          dataKey="date"
+                          stroke="#ffffff30"
+                          fontSize={10}
+                          tickLine={false}
+                          axisLine={false}
                         />
-                        <YAxis 
-                          stroke="#ffffff30" 
-                          fontSize={10} 
-                          tickLine={false} 
+                        <YAxis
+                          stroke="#ffffff30"
+                          fontSize={10}
+                          tickLine={false}
                           axisLine={false}
                           tickFormatter={(value) => `LKR ${value}`}
                         />
-                        <Tooltip 
+                        <Tooltip
                           contentStyle={{ backgroundColor: "#0E1015", border: "1px solid #ffffff10", borderRadius: "12px", fontSize: "10px" }}
                           itemStyle={{ color: "#8b5cf6" }}
                         />
@@ -1152,7 +1153,7 @@ const AdminDashboard = () => {
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="transparent" />
                           ))}
                         </Pie>
-                        <Tooltip 
+                        <Tooltip
                           contentStyle={{ backgroundColor: "#0E1015", border: "1px solid #ffffff10", borderRadius: "12px", fontSize: "10px" }}
                         />
                         <Legend iconType="circle" />
@@ -1169,16 +1170,16 @@ const AdminDashboard = () => {
                       <BarChart data={barData} layout="vertical">
                         <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" horizontal={false} />
                         <XAxis type="number" hide />
-                        <YAxis 
-                          dataKey="name" 
-                          type="category" 
-                          stroke="#ffffff60" 
-                          fontSize={10} 
+                        <YAxis
+                          dataKey="name"
+                          type="category"
+                          stroke="#ffffff60"
+                          fontSize={10}
                           width={80}
                           tickLine={false}
                           axisLine={false}
                         />
-                        <Tooltip 
+                        <Tooltip
                           cursor={{ fill: "#ffffff05" }}
                           contentStyle={{ backgroundColor: "#0E1015", border: "1px solid #ffffff10", borderRadius: "12px", fontSize: "10px" }}
                         />
@@ -1318,7 +1319,7 @@ const AdminDashboard = () => {
                         </td>
                         <td className="py-4 px-6">
                           <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded-md ${u.role === "admin" ? "bg-red-500/10 text-red-400" :
-                              u.role === "rdc-staff" ? "bg-blue-500/10 text-blue-400" : "bg-violet-500/10 text-violet-400"
+                            u.role === "rdc-staff" ? "bg-blue-500/10 text-blue-400" : "bg-violet-500/10 text-violet-400"
                             }`}>
                             {u.role.replace("-", " ")}
                           </span>
@@ -1337,8 +1338,8 @@ const AdminDashboard = () => {
                             <button
                               onClick={() => handleToggleUserStatus(u.uid, u.isActive)}
                               className={`px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase transition-all ${u.isActive
-                                  ? "bg-red-500/5 hover:bg-red-500/10 text-red-400 border border-red-500/10"
-                                  : "bg-emerald-500 hover:bg-emerald-400 text-black shadow-lg shadow-emerald-500/20"
+                                ? "bg-red-500/5 hover:bg-red-500/10 text-red-400 border border-red-500/10"
+                                : "bg-emerald-500 hover:bg-emerald-400 text-black shadow-lg shadow-emerald-500/20"
                                 }`}
                             >
                               {u.isActive ? "Disable" : "Approve Account"}
@@ -1420,11 +1421,10 @@ const AdminDashboard = () => {
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase transition-all border ${
-                      selectedCategory === cat
-                        ? "bg-violet-600 text-white shadow-lg shadow-violet-500/20 border-violet-500"
-                        : "bg-white/5 text-site-text-subtle hover:bg-white/10 hover:text-white/60 border-site-border"
-                    }`}
+                    className={`px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase transition-all border ${selectedCategory === cat
+                      ? "bg-violet-600 text-white shadow-lg shadow-violet-500/20 border-violet-500"
+                      : "bg-white/5 text-site-text-subtle hover:bg-white/10 hover:text-white/60 border-site-border"
+                      }`}
                   >
                     {cat}
                   </button>
@@ -1434,68 +1434,68 @@ const AdminDashboard = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {products
                   .filter(p => {
-                    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || 
-                                          p.sku.toLowerCase().includes(search.toLowerCase());
+                    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
+                      p.sku.toLowerCase().includes(search.toLowerCase());
                     const matchesCategory = selectedCategory === "All" || p.category === selectedCategory;
                     return matchesSearch && matchesCategory;
                   })
                   .map((product) => (
-                  <div key={product.id} className="group relative rounded-2xl border border-site-border bg-site-card overflow-hidden hover:border-violet-500/30 transition-all duration-300">
-                    <div className="aspect-square bg-white/2 relative">
-                      {product.image ? (
-                        <img src={product.image} alt={product.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white/10">
-                          <Package size={48} />
+                    <div key={product.id} className="group relative rounded-2xl border border-site-border bg-site-card overflow-hidden hover:border-violet-500/30 transition-all duration-300">
+                      <div className="aspect-square bg-white/2 relative">
+                        {product.image ? (
+                          <img src={product.image} alt={product.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-white/10">
+                            <Package size={48} />
+                          </div>
+                        )}
+                        <div className="absolute top-2 right-2 flex gap-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                          <button
+                            onClick={() => {
+                              setEditingProduct(product);
+                              setIsProductModalOpen(true);
+                            }}
+                            className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur-md border border-white/10 text-white flex items-center justify-center hover:bg-violet-600 transition-colors"
+                          >
+                            <Pencil size={14} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteProduct(product.id, product.image)}
+                            className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur-md border border-white/10 text-white flex items-center justify-center hover:bg-red-600 transition-colors"
+                          >
+                            <Trash2 size={14} />
+                          </button>
                         </div>
-                      )}
-                      <div className="absolute top-2 right-2 flex gap-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                        <button
-                          onClick={() => {
-                            setEditingProduct(product);
-                            setIsProductModalOpen(true);
-                          }}
-                          className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur-md border border-white/10 text-white flex items-center justify-center hover:bg-violet-600 transition-colors"
-                        >
-                          <Pencil size={14} />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteProduct(product.id, product.image)}
-                          className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur-md border border-white/10 text-white flex items-center justify-center hover:bg-red-600 transition-colors"
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                        {product.badge && (
+                          <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-violet-600/80 backdrop-blur-sm text-[10px] font-bold text-white uppercase tracking-wider">
+                            {product.badge}
+                          </span>
+                        )}
                       </div>
-                      {product.badge && (
-                        <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-violet-600/80 backdrop-blur-sm text-[10px] font-bold text-white uppercase tracking-wider">
-                          {product.badge}
-                        </span>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-[10px] font-mono text-site-text-subtle">{product.sku}</p>
-                        <p className={`text-[10px] font-bold uppercase ${product.stock < 10 ? 'text-red-400' : 'text-emerald-400'}`}>
-                          {product.stock} in stock
-                        </p>
-                      </div>
-                      <h4 className="text-sm font-bold text-white mb-2 line-clamp-1">{product.name}</h4>
-                      <div className="flex items-center justify-between">
-                        <p className="text-violet-400 font-black">{product.price}</p>
-                        <span className="text-[10px] text-white/20 uppercase font-black tracking-widest bg-white/5 px-2 py-1 rounded-md">
-                          {product.category}
-                        </span>
+                      <div className="p-4">
+                        <div className="flex items-center justify-between mb-1">
+                          <p className="text-[10px] font-mono text-site-text-subtle">{product.sku}</p>
+                          <p className={`text-[10px] font-bold uppercase ${product.stock < 10 ? 'text-red-400' : 'text-emerald-400'}`}>
+                            {product.stock} in stock
+                          </p>
+                        </div>
+                        <h4 className="text-sm font-bold text-white mb-2 line-clamp-1">{product.name}</h4>
+                        <div className="flex items-center justify-between">
+                          <p className="text-violet-400 font-black">{product.price}</p>
+                          <span className="text-[10px] text-white/20 uppercase font-black tracking-widest bg-white/5 px-2 py-1 rounded-md">
+                            {product.category}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
 
                 {products.length === 0 && !isSeeding && (
                   <div className="col-span-full py-32 text-center bg-white/2 rounded-[3rem] border border-dashed border-white/10">
                     <ShoppingBag size={48} className="mx-auto text-white/10 mb-4" />
                     <h4 className="text-white/60 font-bold mb-2">No Products Found</h4>
                     <p className="text-site-text-subtle text-sm mb-8">Start by adding your first product or seed default data.</p>
-                    <button 
+                    <button
                       onClick={() => setIsProductModalOpen(true)}
                       className="px-6 py-2 rounded-xl bg-violet-600 text-white text-xs font-bold"
                     >
@@ -1599,7 +1599,7 @@ const AdminDashboard = () => {
                     </div>
                     <p className="text-sm text-white/60 leading-relaxed italic">"{review.comment}"</p>
                     <p className="text-[10px] text-white/20 text-right italic">
-                      {review.createdAt?.seconds 
+                      {review.createdAt?.seconds
                         ? new Date(review.createdAt.seconds * 1000).toLocaleDateString()
                         : "Just now"}
                     </p>
@@ -1640,11 +1640,10 @@ const AdminDashboard = () => {
                           <p className="text-xs text-site-text-subtle uppercase tracking-widest font-bold">Order ID</p>
                           <p className="text-sm font-black text-white">{request.orderId.toUpperCase()}</p>
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
-                          request.status === "pending" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" :
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${request.status === "pending" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" :
                           request.status === "approved" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" :
-                          "bg-red-500/10 text-red-500 border border-red-500/20"
-                        }`}>
+                            "bg-red-500/10 text-red-500 border border-red-500/20"
+                          }`}>
                           {request.status}
                         </span>
                       </div>

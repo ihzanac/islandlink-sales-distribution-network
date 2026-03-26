@@ -5,6 +5,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/config";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { setUser } from "../store/slices/authSlice";
+import { toast } from "react-toastify";
 import { Layers, Mail, Lock, ArrowRight, Store, Building2, ShieldCheck, Truck } from "lucide-react";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -66,6 +67,7 @@ const LoginPage = () => {
           isActive: true,
           status: "active"
         }));
+        toast.success("login Successfully");
         navigate("/dashboard");
         return;
       }
@@ -101,9 +103,13 @@ const LoginPage = () => {
           district: userData.district || null,
           phone: userData.phone || null,
           province: userData.province || null,
+          lat: userData.lat || null,
+          lng: userData.lng || null,
           isActive: userData.isActive,
           status: userData.status
         }));
+
+        toast.success("login Successfully");
 
         if (userData.role === 'retail-customer') {
           navigate('/customer-history');

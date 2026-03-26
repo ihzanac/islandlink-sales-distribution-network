@@ -7,11 +7,6 @@ interface ProtectedRouteProps {
   allowedRoles?: string[];
 }
 
-/**
- * ProtectedRoute Component
- * Checks if a user is logged in and if their role is allowed to access the route.
- * Also checks if the account is active.
- */
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
   const { uid, role, isActive } = useAppSelector((state) => state.auth);
   const location = useLocation();
@@ -35,7 +30,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
       if (role === 'rdc-staff') return <Navigate to="/delivery-boy" replace />;
       if (role === 'admin' || role === 'head-office') return <Navigate to="/dashboard" replace />;
       if (role === 'logistics') return <Navigate to="/logistics-dashboard" replace />;
-      
+
       // Default fallback for authorized users with no specific role match
       return <Navigate to="/" replace />;
     }

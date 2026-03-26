@@ -185,8 +185,8 @@ function TrackingTimeline({ status, assignedStaffId }: { status: OrderStatus, as
       <div className="relative flex justify-between items-center w-full">
         {/* Progress Line */}
         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-white/5" />
-        <div 
-          className="absolute left-0 top-1/2 -translate-y-1/2 h-0.5 bg-violet-500 transition-all duration-1000" 
+        <div
+          className="absolute left-0 top-1/2 -translate-y-1/2 h-0.5 bg-violet-500 transition-all duration-1000"
           style={{ width: `${status === "cancelled" ? 0 : Math.min(100, (activeStep / 4) * 100)}%` }}
         />
 
@@ -197,18 +197,16 @@ function TrackingTimeline({ status, assignedStaffId }: { status: OrderStatus, as
 
           return (
             <div key={step.id} className="relative z-10 flex flex-col items-center gap-2 group">
-              <div 
-                className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-500 ${
-                  isDone 
-                    ? "bg-violet-600 border-violet-500 shadow-lg shadow-violet-500/20" 
+              <div
+                className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-500 ${isDone
+                    ? "bg-violet-600 border-violet-500 shadow-lg shadow-violet-500/20"
                     : "bg-site-card border-white/10"
-                } ${isActive ? "scale-110 ring-4 ring-violet-500/10" : ""}`}
+                  } ${isActive ? "scale-110 ring-4 ring-violet-500/10" : ""}`}
               >
                 <Icon size={14} className={isDone ? "text-white" : "text-white/20"} />
               </div>
-              <p className={`text-[10px] font-bold absolute -bottom-6 whitespace-nowrap transition-colors ${
-                isDone ? "text-white" : "text-white/20"
-              }`}>
+              <p className={`text-[10px] font-bold absolute -bottom-6 whitespace-nowrap transition-colors ${isDone ? "text-white" : "text-white/20"
+                }`}>
                 {step.label}
               </p>
             </div>
@@ -225,7 +223,7 @@ function getDeliveryEstimate(createdAt: string, status: OrderStatus) {
 
   const created = new Date(createdAt);
   const estimate = new Date(created.getTime() + 48 * 60 * 60 * 1000); // Standard 48h
-  
+
   const today = new Date();
   const diffDays = Math.ceil((estimate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
@@ -677,7 +675,7 @@ function OrderCard({ order }: { order: Order }) {
   const handleCancelOrder = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isWithinOneHour) return;
-    
+
     if (window.confirm("Are you sure you want to cancel this order?")) {
       setCancelling(true);
       try {
@@ -851,22 +849,22 @@ function OrderCard({ order }: { order: Order }) {
 
           {/* New Tracking Progress Section */}
           <div className="rounded-2xl border border-site-border bg-white/2 p-6 overflow-hidden">
-             <div className="flex items-center justify-between mb-8">
-               <p className="text-site-text-subtle text-[10px] font-bold uppercase tracking-widest">
-                 Live Progress
-               </p>
-               <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-violet-500/10 border border-violet-500/20">
-                 <Clock size={12} className="text-violet-400" />
-                 <span className="text-[10px] text-white font-bold uppercase tracking-wider">
-                   {getDeliveryEstimate(order.createdAt, order.status)}
-                 </span>
-               </div>
-             </div>
-             <TrackingTimeline status={order.status} assignedStaffId={order.assignedStaffId} />
-             <div className="mt-10 flex items-center justify-center gap-2 text-site-text-subtle text-[10px] bg-white/3 py-2 rounded-xl border border-site-border">
-                <MapPin size={10} className="text-violet-400" />
-                <span>Current Location: <span className="text-white/60 font-medium">{getLocationDescription(order.status, order.assignedStaffId)}</span></span>
-             </div>
+            <div className="flex items-center justify-between mb-8">
+              <p className="text-site-text-subtle text-[10px] font-bold uppercase tracking-widest">
+                Live Progress
+              </p>
+              <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-violet-500/10 border border-violet-500/20">
+                <Clock size={12} className="text-violet-400" />
+                <span className="text-[10px] text-white font-bold uppercase tracking-wider">
+                  {getDeliveryEstimate(order.createdAt, order.status)}
+                </span>
+              </div>
+            </div>
+            <TrackingTimeline status={order.status} assignedStaffId={order.assignedStaffId} />
+            <div className="mt-10 flex items-center justify-center gap-2 text-site-text-subtle text-[10px] bg-white/3 py-2 rounded-xl border border-site-border">
+              <MapPin size={10} className="text-violet-400" />
+              <span>Current Location: <span className="text-white/60 font-medium">{getLocationDescription(order.status, order.assignedStaffId)}</span></span>
+            </div>
           </div>
 
           {/* Live Tracking Map Section (Visible for all active orders) */}
@@ -883,10 +881,10 @@ function OrderCard({ order }: { order: Order }) {
               </div>
               <div className="relative group">
                 <Wrapper apiKey={GOOGLE_MAPS_API_KEY} render={(status) => renderMapStatus(status) as any}>
-                  <LiveTrackingMap 
-                    staffId={order.assignedStaffId || ""} 
-                    deliveryLat={order.deliveryLat} 
-                    deliveryLng={order.deliveryLng} 
+                  <LiveTrackingMap
+                    staffId={order.assignedStaffId || ""}
+                    deliveryLat={order.deliveryLat}
+                    deliveryLng={order.deliveryLng}
                   />
                 </Wrapper>
                 <div className="absolute top-3 left-3 px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 flex items-center gap-2">
@@ -980,8 +978,8 @@ function OrderCard({ order }: { order: Order }) {
                       onClick={handleCancelOrder}
                       disabled={!isWithinOneHour || cancelling}
                       className={`flex-1 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all duration-300 ${!isWithinOneHour
-                          ? "bg-white/5 text-white/20 cursor-not-allowed"
-                          : "bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20"
+                        ? "bg-white/5 text-white/20 cursor-not-allowed"
+                        : "bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20"
                         }`}
                     >
                       <XCircle size={16} />

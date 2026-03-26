@@ -216,16 +216,6 @@ const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
   const { role: currentRole, uid } = useAppSelector((state) => state.auth);
 
-  // Auto-redirect if already logged in
-  useEffect(() => {
-    if (uid && currentRole) {
-      if (currentRole === 'retail-customer') navigate('/customer-history');
-      else if (currentRole === 'rdc-staff') navigate('/delivery-boy');
-      else if (currentRole === 'logistics') navigate('/logistics-dashboard');
-      else navigate('/dashboard');
-    }
-  }, [uid, currentRole, navigate]);
-
   // Track which step the user is on: role selection, filling info, or done
   const [currentStep, setCurrentStep] = useState<RegistrationStep>("role");
 
@@ -237,6 +227,17 @@ const RegisterPage: React.FC = () => {
 
   // Store coordinates if picked on map
   const [coordinates, setCoordinates] = useState<{ lat: number, lng: number } | null>(null);
+
+  // Auto-redirect if already logged in
+  useEffect(() => {
+    if (currentStep === "done") return; // Prevent redirect if just registered
+    if (uid && currentRole) {
+      if (currentRole === 'retail-customer') navigate('/customer-history');
+      else if (currentRole === 'rdc-staff') navigate('/delivery-boy');
+      else if (currentRole === 'logistics') navigate('/logistics-dashboard');
+      else navigate('/dashboard');
+    }
+  }, [uid, currentRole, navigate, currentStep]);
 
   // Define the two types of users who can register
   const roleOptions: RoleOption[] = [
@@ -339,11 +340,17 @@ const RegisterPage: React.FC = () => {
       });
 
       // Save user data to Firestore
-      console.log("Saving user data to Firestore 'users' collection:", userData);
+      console.log("Saving user data to Firestore:");
+
+      // Save to specifically requested 'user' collection
+      await setDoc(doc(db, "user", user.uid), userData);
+
+      // Save to 'users' collection to ensure app continues to work
       await setDoc(doc(db, "users", user.uid), userData);
+
       console.log("Firestore save successful.");
 
-      toast.success("Registration complete! Your profile has been saved.");
+      toast.success("successful Register");
 
       // Move to the success/done step
       setCurrentStep("done");
