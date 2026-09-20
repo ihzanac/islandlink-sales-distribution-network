@@ -116,3 +116,182 @@ Assigned for Delivery
 Shipped
   ↓
 Delivered
+Customer
+   ↓
+Checkout
+   ↓
+Payment Gateway
+   ↓
+PayHere / PayPal
+   ↓
+Payment Confirmation
+   ↓
+Firebase / Firestore
+   ↓
+Order Status Updated
+                    ISDN SYSTEM
+                         │
+        ┌────────────────┼────────────────┐
+        │                │                │
+    Customer           RDC Staff      Logistics
+        │                │                │
+        └────────────────┼────────────────┘
+                         │
+                    Administrator
+
+                    👥 USERS
+                       │
+                       ▼
+              🌐 PRESENTATION LAYER
+                       │
+                React + TypeScript
+                       │
+                       ▼
+              ⚙️ APPLICATION LAYER
+                       │
+                    Firebase
+                       │
+          ┌────────────┼────────────┐
+          │            │            │
+          ▼            ▼            ▼
+   Authentication  Firestore   Cloud Functions
+          │            │            │
+          └────────────┼────────────┘
+                       │
+                       ▼
+                🗄️ DATA LAYER
+                       │
+                  Firestore DB
+                       │
+        ┌──────────────┼──────────────┐
+        ▼              ▼              ▼
+     Products        Orders        Inventory
+        │              │              │
+        └──────────────┼──────────────┘
+                       │
+                       ▼
+              🌐 EXTERNAL SERVICES
+                       │
+       ┌───────────────┼────────────────┐
+       ▼               ▼                ▼
+   PayHere           PayPal       Google Maps
+
+📂 Project Modules
+ISDN
+│
+├── 👤 Customer Module
+│   ├── Registration
+│   ├── Login
+│   ├── Product Browsing
+│   ├── Product Search
+│   ├── Shopping Cart
+│   ├── Order Placement
+│   ├── Payment
+│   ├── Digital Invoice
+│   ├── Order History
+│   ├── Delivery Tracking
+│   └── Return Requests
+│
+├── 🏢 RDC Module
+│   ├── RDC Dashboard
+│   ├── Order Management
+│   ├── Inventory Management
+│   ├── Stock Transfer
+│   ├── Stock Updates
+│   └── Order Processing
+│
+├── 🚚 Logistics Module
+│   ├── Delivery Assignment
+│   ├── Driver Management
+│   ├── GPS Tracking
+│   ├── Delivery Status
+│   └── Route Monitoring
+│
+├── 👨‍💼 Admin Module
+│   ├── Dashboard
+│   ├── User Management
+│   ├── Customer Management
+│   ├── Staff Management
+│   ├── Product Management
+│   ├── RDC Management
+│   ├── Inventory Monitoring
+│   ├── Order Management
+│   ├── Delivery Management
+│   ├── Payment Monitoring
+│   └── Reports & Analytics
+│
+├── 💳 Payment Module
+│   ├── PayHere
+│   ├── PayPal
+│   └── Payment Confirmation
+│
+├── 🧾 Invoice Module
+│   ├── Customer Details
+│   ├── Product Details
+│   ├── Order Information
+│   ├── Payment Reference
+│   └── Digital Invoice
+│
+├── 🗺️ Google Maps Module
+│   ├── GPS Tracking
+│   ├── Route Information
+│   ├── Location Services
+│   └── Delivery Monitoring
+│
+└── 🔥 Firebase
+    ├── Authentication
+    ├── Firestore
+    ├── Cloud Functions
+    ├── Storage
+    └── Hosting
+🔄 Order Management Workflow
+Customer
+   │
+   ▼
+Browse Products
+   │
+   ▼
+Add to Cart
+   │
+   ▼
+Checkout
+   │
+   ▼
+Payment
+   │
+   ▼
+Order Created
+   │
+   ▼
+RDC Processing
+   │
+   ▼
+Inventory Updated
+   │
+   ▼
+Delivery Assigned
+   │
+   ▼
+Shipment
+   │
+   ▼
+GPS Delivery Tracking
+   │
+   ▼
+Delivered
+📦 Inventory Workflow
+Product Added
+     ↓
+Inventory Updated
+     ↓
+Customer Places Order
+     ↓
+Order Processing
+     ↓
+Stock Deducted
+     ↓
+Inventory Synchronization
+     ↓
+RDC Stock Updated
+     ↓
+Inventory Report
