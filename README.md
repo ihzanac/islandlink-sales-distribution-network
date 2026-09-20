@@ -1,73 +1,122 @@
-# React + TypeScript + Vite
+# 🚚 IslandLink Sales Distribution Network (ISDN)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<p align="center">
+  <img src="https://img.shields.io/badge/ISDN-Sales%20Distribution%20System-blue?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Frontend-React%20%7C%20TypeScript-black?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Backend-Firebase-orange?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Database-Firestore-yellow?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Maps-Google%20Maps-green?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Payments-PayHere%20%7C%20PayPal-blue?style=for-the-badge">
+</p>
 
-Currently, two official plugins are available:
+<p align="center">
+  <b>Centralized Sales Distribution Management System</b>
+  <br>
+  A web-based platform for managing products, orders, inventory, payments, deliveries, logistics, and distribution operations.
+</p>
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## 🌟 System Overview
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**IslandLink Sales Distribution Network (ISDN)** is a centralized web-based Sales Distribution Management System designed to connect retail customers, Regional Distribution Centres (RDCs), logistics teams, and Head Office management through a single digital platform.
 
-## Expanding the ESLint configuration
+The system is designed to replace manual distribution processes with an integrated digital workflow covering:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- 🛍️ Product browsing
+- 🛒 Online ordering
+- 📦 Inventory management
+- 🧾 Digital invoicing
+- 💳 Online payment
+- 🚚 Delivery management
+- 📍 GPS-based delivery tracking
+- 👥 Role-based access control
+- 📊 Reporting and analytics
+- 🔄 Real-time data synchronization
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 🎯 System Objectives
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+The main objectives of the ISDN system are:
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+| Objective | Description |
+|---|---|
+| 💻 Centralized Management | Manage island-wide sales and distribution operations through one platform |
+| 🛒 Order Management | Allow retail customers to browse products and place orders |
+| 📦 Inventory Control | Monitor and synchronize inventory across distribution centres |
+| 🚚 Logistics Management | Coordinate deliveries and monitor delivery activities |
+| 💳 Financial Processing | Support digital payments and payment-related operations |
+| 📍 Delivery Tracking | Provide GPS-based delivery tracking and route information |
+| 📊 Reporting | Provide dashboards, reports, and business analytics |
+| 🔐 Security | Provide authentication and role-based access control |
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 🚀 Main Features
+
+### 👤 Customer / Retailer Portal
+
+Retail customers can:
+
+- 🔐 Register and login
+- 🛍️ Browse available products
+- 🔎 Search products
+- 🛒 Add products to cart
+- 📝 Place orders
+- 📦 View order details
+- 📋 View order history
+- 💳 Make online payments
+- 🧾 Access digital invoices
+- 🚚 Track deliveries
+- 📍 View delivery information
+- 🔄 Submit return requests
+- 👤 Manage account information
+
+---
+
+## 🏢 Regional Distribution Centre (RDC)
+
+RDC staff can manage distribution activities including:
+
+- 📊 RDC dashboard
+- 📦 Inventory monitoring
+- 🛒 Order management
+- ⚙️ Order processing
+- 🔄 Stock updates
+- 📦 Stock transfers between RDCs
+- 🧾 Order and invoice information
+- 🚚 Delivery assignment
+- 📋 Delivery status management
+- 📊 Distribution reports
+
+---
+
+## 🚚 Logistics & Delivery Management
+
+The logistics module supports delivery coordination and monitoring.
+
+### Features
+
+- 🚚 Delivery assignment
+- 👤 Driver / logistics management
+- 📍 GPS location tracking
+- 🗺️ Google Maps integration
+- 🧭 Route information
+- 📦 Shipment monitoring
+- 🔄 Delivery status updates
+- ⏱️ Delivery progress monitoring
+- 📊 Delivery reports
+
+Delivery status can be updated through different stages such as:
+
+```text
+Order
+  ↓
+Processing
+  ↓
+Assigned for Delivery
+  ↓
+Shipped
+  ↓
+Delivered
