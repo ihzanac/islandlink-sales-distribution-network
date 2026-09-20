@@ -21,7 +21,7 @@
 
 **IslandLink Sales Distribution Network (ISDN)** is a centralized web-based Sales Distribution Management System designed to connect retail customers, Regional Distribution Centres (RDCs), logistics teams, and Head Office management through a single digital platform.
 
-The system is designed to replace manual distribution processes with an integrated digital workflow covering:
+The system provides an integrated digital workflow covering:
 
 - 🛍️ Product browsing
 - 🛒 Online ordering
@@ -37,8 +37,6 @@ The system is designed to replace manual distribution processes with an integrat
 ---
 
 ## 🎯 System Objectives
-
-The main objectives of the ISDN system are:
 
 | Objective | Description |
 |---|---|
@@ -56,8 +54,6 @@ The main objectives of the ISDN system are:
 ## 🚀 Main Features
 
 ### 👤 Customer / Retailer Portal
-
-Retail customers can:
 
 - 🔐 Register and login
 - 🛍️ Browse available products
@@ -108,7 +104,7 @@ The logistics module supports delivery coordination and monitoring.
 - ⏱️ Delivery progress monitoring
 - 📊 Delivery reports
 
-Delivery status can be updated through different stages such as:
+### Delivery Workflow
 
 ```text
 Order
