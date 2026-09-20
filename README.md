@@ -1,297 +1,235 @@
-# 🚚 IslandLink Sales Distribution Network (ISDN)
-
-<p align="center">
-  <img src="https://img.shields.io/badge/ISDN-Sales%20Distribution%20System-blue?style=for-the-badge">
-  <img src="https://img.shields.io/badge/Frontend-React%20%7C%20TypeScript-black?style=for-the-badge">
-  <img src="https://img.shields.io/badge/Backend-Firebase-orange?style=for-the-badge">
-  <img src="https://img.shields.io/badge/Database-Firestore-yellow?style=for-the-badge">
-  <img src="https://img.shields.io/badge/Maps-Google%20Maps-green?style=for-the-badge">
-  <img src="https://img.shields.io/badge/Payments-PayHere%20%7C%20PayPal-blue?style=for-the-badge">
-</p>
-
-<p align="center">
-  <b>Centralized Sales Distribution Management System</b>
-  <br>
-  A web-based platform for managing products, orders, inventory, payments, deliveries, logistics, and distribution operations.
-</p>
-
----
+# 🚚 ISDN – IslandLink Sales Distribution Network
 
 ## 🌟 System Overview
 
-**IslandLink Sales Distribution Network (ISDN)** is a centralized web-based Sales Distribution Management System designed to connect retail customers, Regional Distribution Centres (RDCs), logistics teams, and Head Office management through a single digital platform.
-
-The system provides an integrated digital workflow covering:
-
-- 🛍️ Product browsing
-- 🛒 Online ordering
-- 📦 Inventory management
-- 🧾 Digital invoicing
-- 💳 Online payment
-- 🚚 Delivery management
-- 📍 GPS-based delivery tracking
-- 👥 Role-based access control
-- 📊 Reporting and analytics
-- 🔄 Real-time data synchronization
-
----
-
 ## 🎯 System Objectives
-
-| Objective | Description |
-|---|---|
-| 💻 Centralized Management | Manage island-wide sales and distribution operations through one platform |
-| 🛒 Order Management | Allow retail customers to browse products and place orders |
-| 📦 Inventory Control | Monitor and synchronize inventory across distribution centres |
-| 🚚 Logistics Management | Coordinate deliveries and monitor delivery activities |
-| 💳 Financial Processing | Support digital payments and payment-related operations |
-| 📍 Delivery Tracking | Provide GPS-based delivery tracking and route information |
-| 📊 Reporting | Provide dashboards, reports, and business analytics |
-| 🔐 Security | Provide authentication and role-based access control |
-
----
 
 ## 🚀 Main Features
 
-### 👤 Customer / Retailer Portal
+### 👤 Customer Portal
+- Registration / Login
+- Product Catalogue
+- Product Search
+- Cart
+- Order Placement
+- Order History
+- Delivery Tracking
+- Online Payment
+- Reviews
+- Return Requests
 
-- 🔐 Register and login
-- 🛍️ Browse available products
-- 🔎 Search products
-- 🛒 Add products to cart
-- 📝 Place orders
-- 📦 View order details
-- 📋 View order history
-- 💳 Make online payments
-- 🧾 Access digital invoices
-- 🚚 Track deliveries
-- 📍 View delivery information
-- 🔄 Submit return requests
-- 👤 Manage account information
+### 👨‍💼 Admin Portal
+- Admin Dashboard
+- User Management
+- Staff Management
+- Order Management
+- Product Management
+- Inventory Management
+- Reports
+- Reviews
+- Returns
+- System Settings
 
----
+### 🚚 Logistics Team Portal
+- Fleet Monitor
+- Shipment Management
+- Delivery Assignment
+- Delivery Status
+- GPS Tracking
+- Cross-RDC Management
+- Efficiency Monitoring
 
-## 🏢 Regional Distribution Centre (RDC)
+### 🏢 RDC Staff Portal
+- RDC Dashboard
+- Inventory Management
+- Order Processing
+- Shipment Processing
+- Stock Updates
+- Delivery Coordination
 
-RDC staff can manage distribution activities including:
+## 📦 Product Management
 
-- 📊 RDC dashboard
-- 📦 Inventory monitoring
-- 🛒 Order management
-- ⚙️ Order processing
-- 🔄 Stock updates
-- 📦 Stock transfers between RDCs
-- 🧾 Order and invoice information
-- 🚚 Delivery assignment
-- 📋 Delivery status management
-- 📊 Distribution reports
+## 🛒 Cart & Order Management
 
----
+## 💳 Online Payment
 
-## 🚚 Logistics & Delivery Management
+### PayHere
+### PayPal
 
-The logistics module supports delivery coordination and monitoring.
+## 🚚 Delivery Management
 
-### Features
+### Delivery Assignment
+### Live GPS Tracking
+### Google Maps
+### Route Management
 
-- 🚚 Delivery assignment
-- 👤 Driver / logistics management
-- 📍 GPS location tracking
-- 🗺️ Google Maps integration
-- 🧭 Route information
-- 📦 Shipment monitoring
-- 🔄 Delivery status updates
-- ⏱️ Delivery progress monitoring
-- 📊 Delivery reports
+## 🗺️ Google Maps Integration
 
-### Delivery Workflow
+## ⭐ Reviews & Ratings
 
-```text
-Order
-  ↓
-Processing
-  ↓
-Assigned for Delivery
-  ↓
-Shipped
-  ↓
-Delivered
-Customer
-   ↓
-Checkout
-   ↓
-Payment Gateway
-   ↓
-PayHere / PayPal
-   ↓
-Payment Confirmation
-   ↓
-Firebase / Firestore
-   ↓
-Order Status Updated
-                    ISDN SYSTEM
-                         │
-        ┌────────────────┼────────────────┐
-        │                │                │
-    Customer           RDC Staff      Logistics
-        │                │                │
-        └────────────────┼────────────────┘
-                         │
-                    Administrator
+## 🔄 Return Management
 
-                    👥 USERS
-                       │
-                       ▼
-              🌐 PRESENTATION LAYER
-                       │
-                React + TypeScript
-                       │
-                       ▼
-              ⚙️ APPLICATION LAYER
-                       │
-                    Firebase
-                       │
-          ┌────────────┼────────────┐
-          │            │            │
-          ▼            ▼            ▼
-   Authentication  Firestore   Cloud Functions
-          │            │            │
-          └────────────┼────────────┘
-                       │
-                       ▼
-                🗄️ DATA LAYER
-                       │
-                  Firestore DB
-                       │
-        ┌──────────────┼──────────────┐
-        ▼              ▼              ▼
-     Products        Orders        Inventory
-        │              │              │
-        └──────────────┼──────────────┘
-                       │
-                       ▼
-              🌐 EXTERNAL SERVICES
-                       │
-       ┌───────────────┼────────────────┐
-       ▼               ▼                ▼
-   PayHere           PayPal       Google Maps
+## 🔐 Authentication & Security
 
-📂 Project Modules
+## 🗄️ Database
+
+### Firebase Authentication
+### Cloud Firestore
+
+## 🏗️ System Architecture
+
+### Three-Tier Architecture
+
+Presentation Layer
+        ↓
+Application Layer
+        ↓
+Data Layer
+
+## 🛠️ Technology Stack
+
+### Frontend
+- React
+- TypeScript
+- HTML
+- CSS
+- JavaScript
+
+### Backend
+- Firebase
+
+### Database
+- Firebase Firestore
+
+### Payment
+- PayHere
+- PayPal
+
+### Maps
+- Google Maps API
+
+### Development Tools
+- Git
+- GitHub
+- VS Code
+
+## 📂 Project Modules
+
 ISDN
 │
-├── 👤 Customer Module
-│   ├── Registration
-│   ├── Login
-│   ├── Product Browsing
-│   ├── Product Search
-│   ├── Shopping Cart
-│   ├── Order Placement
-│   ├── Payment
-│   ├── Digital Invoice
-│   ├── Order History
+├── Customer Module
+│   ├── Authentication
+│   ├── Product Catalogue
+│   ├── Cart
+│   ├── Orders
+│   ├── Payments
 │   ├── Delivery Tracking
-│   └── Return Requests
+│   ├── Reviews
+│   └── Returns
 │
-├── 🏢 RDC Module
-│   ├── RDC Dashboard
-│   ├── Order Management
-│   ├── Inventory Management
-│   ├── Stock Transfer
-│   ├── Stock Updates
-│   └── Order Processing
-│
-├── 🚚 Logistics Module
-│   ├── Delivery Assignment
-│   ├── Driver Management
-│   ├── GPS Tracking
-│   ├── Delivery Status
-│   └── Route Monitoring
-│
-├── 👨‍💼 Admin Module
+├── Admin Module
 │   ├── Dashboard
-│   ├── User Management
-│   ├── Customer Management
-│   ├── Staff Management
-│   ├── Product Management
-│   ├── RDC Management
-│   ├── Inventory Monitoring
-│   ├── Order Management
-│   ├── Delivery Management
-│   ├── Payment Monitoring
-│   └── Reports & Analytics
+│   ├── Orders
+│   ├── Users & Staff
+│   ├── Inventory
+│   ├── Reports
+│   ├── Reviews
+│   └── Returns
 │
-├── 💳 Payment Module
+├── Logistics Module
+│   ├── Fleet Monitor
+│   ├── Shipments
+│   ├── Delivery Assignment
+│   ├── Cross-RDC
+│   └── Efficiency
+│
+├── RDC Staff Module
+│   ├── Orders
+│   ├── Inventory
+│   └── Shipments
+│
+├── Payment Module
 │   ├── PayHere
-│   ├── PayPal
-│   └── Payment Confirmation
+│   └── PayPal
 │
-├── 🧾 Invoice Module
-│   ├── Customer Details
-│   ├── Product Details
-│   ├── Order Information
-│   ├── Payment Reference
-│   └── Digital Invoice
-│
-├── 🗺️ Google Maps Module
+├── Delivery Module
+│   ├── Google Maps
 │   ├── GPS Tracking
-│   ├── Route Information
-│   ├── Location Services
-│   └── Delivery Monitoring
+│   └── Delivery Status
 │
-└── 🔥 Firebase
+└── Firebase
     ├── Authentication
-    ├── Firestore
-    ├── Cloud Functions
-    ├── Storage
-    └── Hosting
-🔄 Order Management Workflow
-Customer
-   │
-   ▼
-Browse Products
-   │
-   ▼
-Add to Cart
-   │
-   ▼
-Checkout
-   │
-   ▼
-Payment
-   │
-   ▼
-Order Created
-   │
-   ▼
-RDC Processing
-   │
-   ▼
-Inventory Updated
-   │
-   ▼
-Delivery Assigned
-   │
-   ▼
-Shipment
-   │
-   ▼
-GPS Delivery Tracking
-   │
-   ▼
-Delivered
-📦 Inventory Workflow
-Product Added
-     ↓
-Inventory Updated
-     ↓
-Customer Places Order
-     ↓
-Order Processing
-     ↓
-Stock Deducted
-     ↓
-Inventory Synchronization
-     ↓
-RDC Stock Updated
-     ↓
-Inventory Report
+    └── Firestore
+
+## 📊 Database
+
+## 🔑 User Roles
+
+| Role | Responsibilities |
+|------|------------------|
+| Customer | Orders, payments, tracking |
+| Admin | Full system management |
+| Logistics Team | Delivery and fleet management |
+| RDC Staff | RDC operations and inventory |
+
+## ⚙️ System Requirements
+
+### Software
+- Windows / macOS / Linux
+- Node.js
+- npm
+- VS Code
+- Firebase Account
+- Google Maps API Account
+- PayHere Account
+- PayPal Account
+
+### Hardware
+- 8 GB RAM recommended
+- Modern processor
+- 250 GB storage
+- Stable internet
+
+## 📥 Installation
+
+### 1. Clone Repository
+
+git clone YOUR_REPOSITORY_URL
+
+### 2. Navigate
+
+cd ISDN
+
+### 3. Install Dependencies
+
+npm install
+
+### 4. Configure Firebase
+
+### 5. Configure Google Maps
+
+### 6. Configure PayHere
+
+### 7. Configure PayPal
+
+### 8. Run Application
+
+npm run dev
+
+## 🔐 Environment Variables
+
+```env
+FIREBASE_API_KEY=
+FIREBASE_AUTH_DOMAIN=
+FIREBASE_PROJECT_ID=
+FIREBASE_STORAGE_BUCKET=
+FIREBASE_MESSAGING_SENDER_ID=
+FIREBASE_APP_ID=
+
+GOOGLE_MAPS_API_KEY=
+
+PAYHERE_MERCHANT_ID=
+PAYHERE_SECRET=
+
+PAYPAL_CLIENT_ID=
+PAYPAL_SECRET=
